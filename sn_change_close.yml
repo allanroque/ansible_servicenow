@@ -1,0 +1,23 @@
+---
+- name: Automate SNOW - Change Close
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - servicenow.itsm
+
+  tasks:
+    - name: Close change request for provisioning server
+      servicenow.itsm.change_request:
+        instance:
+          host: "{{ snow_credentials.instance | default(snow_instance, true)}}"
+          username:  "{{ snow_credentials.username | default(snow_username, true)}}"
+          password: "{{ snow_credentials.password | default(snow_password, true)}}"
+        state: closed
+        close_code: "successful"
+        close_notes: "Closed"
+        number: "{{ sn_change_number }}"
+
+    - name: Close change Log
+      debug:
+        msg: "The {{ sn_change_number }} change has been successfully closed."

@@ -1,0 +1,33 @@
+---
+- name: Automate SNOW - Change Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - servicenow.itsm
+
+  tasks:
+    - name: Create change request for provisioning server
+      servicenow.itsm.change_request:
+        instance:
+          host: "{{ snow_credentials.instance | default(snow_instance, true)}}"
+          username:  "{{ snow_credentials.username | default(snow_username, true)}}"
+          password: "{{ snow_credentials.password | default(snow_password, true)}}"
+        state: new
+        type: standard
+        category: service
+        requested_by: "{{ snow_credentials.username | default(snow_username, true)}}"
+        short_description: "Update server with latest patch for improved security and performance."
+        description: "This change request is being made to update the server with the latest patch in order to improve its security and performance. The patch includes critical security updates and bug fixes that will enhance the server's stability and reduce the risk of vulnerabilities. The update is necessary to ensure that the server is operating at its optimal level and to protect against potential security threats."
+        priority: moderate
+        risk: low
+        impact: low
+      register: change_output
+
+    - debug:
+        var: change_output.record.number
+
+    - name: Set host IP address variable
+      set_stats:
+        data:
+          sn_change_number: "{{ change_output.record.number }}"
